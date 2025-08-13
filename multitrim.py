@@ -515,7 +515,7 @@ def adapter_identification_pe(artificial_artifacts, seqtk_binary, faqcs_binary, 
 				begin_assessment = True
 		else:
 			segment = line.strip().split()
-			detected_adapters[segment[0]] = float(re.findall("\d+\.\d+", segment[3])[0])
+			detected_adapters[segment[0]] = float(re.findall(r"\d+\.\d+", segment[3])[0])
 
 	detection_report.close()
 
@@ -576,7 +576,7 @@ def adapter_identification_se(artificial_artifacts, seqtk_binary, faqcs_binary, 
 				begin_assessment = True
 		else:
 			segment = line.strip().split()
-			detected_adapters[segment[0]] = float(re.findall("\d+\.\d+", segment[3])[0])
+			detected_adapters[segment[0]] = float(re.findall(r"\d+\.\d+", segment[3])[0])
 
 	detection_report.close()
 
@@ -1028,11 +1028,13 @@ def gather_opts():
 
 	parser.add_argument("--resources", dest = "resource_list", action = 'store_true', help = "Print a list of resources used by Multitrim and quit.")
 
+	parser.add_argument("--version", dest = "version", action = 'store_true', help = "Print the version of multitrim and exit")
+
 
 	return(parser, parser.parse_args())
 
 def print_resources():
-	print("Multitrim github: https://github.com/KGerhardt/multitrim")
+	print("Multitrim github: https://github.com/bio-miga/multitrim")
 	print("MiGA adapters available at: https://github.com/bio-miga/miga/blob/main/utils/adapters.fa")
 	internal_adapters = faqcs_internal_adapters()
 	print("FaQCs mandatory adapters are:")
@@ -1042,6 +1044,9 @@ def print_resources():
 	print("fastp github: https://github.com/OpenGene/fastp")
 	print("Falco github: https://github.com/smithlabcode/falco")
 
+def print_version():
+	print("MiGA's Multitrim 1.0")
+
 #Program Control
 def main():
 	#Keep the parser on hand so I can prent usage as needed.s
@@ -1050,6 +1055,10 @@ def main():
 	resources = options.resource_list
 	if resources:
 		print_resources()
+		quit()
+
+	if options.version:
+		print_version()
 		quit()
 
 
