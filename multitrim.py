@@ -984,7 +984,7 @@ def pretty_print_file_size(name, start, end, start_time, end_time):
 
 	runtime = '%02d:%02d:%02d' % (hours, minutes, seconds)
 
-	print(name, "compressed! Compression took:", runtime, "and the file was compressed to",  str(round((end/start)*100, 2)), "percent of original size from", humansize(start), "to", humansize(end))
+	print(name, "compressed! Compression took:", runtime)
 
 	return None
 
