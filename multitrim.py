@@ -507,6 +507,7 @@ def adapter_identification_pe(artificial_artifacts, seqtk_binary, faqcs_binary, 
 
 	# If no report can be found, assume no adapters
 	if not os.path.exists(output + "/" + prefix + "Subsample_Adapter_Detection.stats.txt"):
+		print("Nothing detected!")
 		return []
 
 	#Adapter detection from output of FaQCs
@@ -573,6 +574,7 @@ def adapter_identification_se(artificial_artifacts, seqtk_binary, faqcs_binary, 
 
 	# If no report can be found, assume no adapters
 	if not os.path.exists(output + "/" + prefix + "Subsample_Adapter_Detection.stats.txt"):
+		print("Nothing detected!")
 		return []
 
 	#Adapter detection from output of FaQCs
@@ -639,7 +641,7 @@ def parse_adapters(full_list, detected_adapters, output, prefix = ""):
 
 	subset.close()
 
-	return(output+"/"+ prefix + "detected_adapters.fasta")
+	return(output + "/" + prefix + "detected_adapters.fasta")
 
 #paired end version of the full trim; trims using detected adapters with FaQCs -q 27, then fastp --cut_right window 3 qual 20
 def full_trim_pe(forward_in, reverse_in, forward_out, reverse_out, directory, adapters, threads, faqcs, fastp, score, minlen, window, window_qual, prefix, compressor, compress_level, phred_fmt = "33", advanced = False, skip_fastp = False, skip_faqcs = False):
