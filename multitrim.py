@@ -502,7 +502,8 @@ def adapter_identification_pe(artificial_artifacts, seqtk_binary, faqcs_binary, 
 	ps = subprocess.Popen(faqcs_subset_command)
 	ps.wait()
 
-	os.remove(output + "/" + pdf_name)
+	if os.path.exists(output + "/" + pdf_name):
+		os.remove(output + "/" + pdf_name)
 
 	#Adapter detection from output of FaQCs
 	detection_report = open(output + "/" + prefix + "Subsample_Adapter_Detection.stats.txt")
@@ -527,7 +528,7 @@ def adapter_identification_pe(artificial_artifacts, seqtk_binary, faqcs_binary, 
 
 	#Cleans up after itself.
 	for item in seqtk_samples:
-		os.remove(item)
+		if os.path.exists(item): os.remove(item)
 
 	print("Detection done!")
 
@@ -563,7 +564,8 @@ def adapter_identification_se(artificial_artifacts, seqtk_binary, faqcs_binary, 
 	ps = subprocess.Popen(faqcs_subset_command)
 	ps.wait()
 
-	os.remove(output + "/" + pdf_name)
+	if os.path.exists(output + "/" + pdf_name):
+		os.remove(output + "/" + pdf_name)
 
 	#Adapter detection from output of FaQCs
 	detection_report = open(output + "/" + prefix + "Subsample_Adapter_Detection.stats.txt")
@@ -685,15 +687,21 @@ def full_trim_pe(forward_in, reverse_in, forward_out, reverse_out, directory, ad
 		printable_time = timer.strftime(time_format)
 		print("Trimming with FaQCs. Started at:", printable_time)
 		subprocess.run(faqcs_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-		os.remove(directory + "/" + "reads.stats.txt")
+
+		if os.path.exists(directory + "/" + "reads.stats.txt"):
+			os.remove(directory + "/" + "reads.stats.txt")
 
 	if not skip_fastp:
 		timer = datetime.now()
 		printable_time = timer.strftime(time_format)
 		print("Trimming with Fastp. Started at:", printable_time)
 		subprocess.run(fastp_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-		os.remove(directory + "/" + prefix + "post_trim_fastp.json")
-		os.remove(directory + "/" + prefix + "post_trim_fastp.html")
+
+		if os.path.exists(directory + "/" + prefix + "post_trim_fastp.json"):
+			os.remove(directory + "/" + prefix + "post_trim_fastp.json")
+
+		if os.path.exists(directory + "/" + prefix + "post_trim_fastp.html"):
+			os.remove(directory + "/" + prefix + "post_trim_fastp.html")
 
 
 
@@ -703,7 +711,9 @@ def full_trim_pe(forward_in, reverse_in, forward_out, reverse_out, directory, ad
 		#rename FaQCs files to correct names; compress
 
 		#remove this one in any event. We don't want any unpaireds with paired end
-		os.remove(directory+"/reads.unpaired.trimmed.fastq")
+		if os.path.exists(directory + "/reads.unpaired.trimmed.fastq"):
+			os.remove(directory + "/reads.unpaired.trimmed.fastq")
+
 		shutil.move(directory+"/reads.1.trimmed.fastq", forward_out)
 		shutil.move(directory+"/reads.2.trimmed.fastq", reverse_out)
 		#compress_commands = [[directory+"/reads.1.trimmed.fastq", forward_out], [directory+"/reads.2.trimmed.fastq", reverse_out]]
@@ -714,10 +724,15 @@ def full_trim_pe(forward_in, reverse_in, forward_out, reverse_out, directory, ad
 
 	elif not skip_faqcs:
 		#remove FaQCs files if fastp has results or skip if FaQCs not done.
-		os.remove(directory+"/reads.1.trimmed.fastq")
-		os.remove(directory+"/reads.2.trimmed.fastq")
+		if os.path.exists(directory + "/reads.1.trimmed.fastq"):
+			os.remove(directory + "/reads.1.trimmed.fastq")
+
+		if os.path.exists(directory + "/reads.2.trimmed.fastq"):
+			os.remove(directory + "/reads.2.trimmed.fastq")
+
 		#remove this one in any event. We don't want any unpaireds with paired end - the call has to be duplicated, unfortunately.
-		os.remove(directory+"/reads.unpaired.trimmed.fastq")
+		if os.path.exists(directory + "/reads.unpaired.trimmed.fastq"):
+			os.remove(directory + "/reads.unpaired.trimmed.fastq")
 
 	compress_results([forward_out, reverse_out], threads, compressor, compress_level)
 
@@ -770,24 +785,30 @@ def full_trim_se(reads_in, reads_out, directory, adapters, threads, faqcs, fastp
 		printable_time = timer.strftime(time_format)
 		print("Trimming with FaQCs. Started at:", printable_time)
 		subprocess.run(faqcs_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-		os.remove(directory + "/" + "reads.stats.txt")
+
+		if os.path.exists(directory + "/" + "reads.stats.txt"):
+			os.remove(directory + "/" + "reads.stats.txt")
 
 	if not skip_fastp:
 		timer = datetime.now()
 		printable_time = timer.strftime(time_format)
 		print("Trimming with Fastp. Started at:", printable_time)
 		subprocess.run(fastp_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-		os.remove(directory + "/" + prefix + "post_trim_fastp.json")
-		os.remove(directory + "/" + prefix + "post_trim_fastp.html")
+
+		if os.path.exists(directory + "/" + prefix + "post_trim_fastp.json"):
+			os.remove(directory + "/" + prefix + "post_trim_fastp.json")
+
+		if os.path.exists(directory + "/" + prefix + "post_trim_fastp.html"):
+			os.remove(directory + "/" + prefix + "post_trim_fastp.html")
 
 
 	if skip_fastp:
 		#compress the result
 		#remove this one in any event. We don't want any unpaireds with paired end
-		shutil.move(directory+"/reads.unpaired.trimmed.fastq", reads_out)
-	elif not skip_faqcs:
+		shutil.move(directory + "/reads.unpaired.trimmed.fastq", reads_out)
+	elif not skip_faqcs and os.path.exists(directory + "/reads.unpaired.trimmed.fastq"):
 		#remove FaQCs files if fastp has results or skip if FaQCs not run.
-		os.remove(directory+"/reads.unpaired.trimmed.fastq")
+		os.remove(directory + "/reads.unpaired.trimmed.fastq")
 
 	compress_results([reads_out], threads, compressor, compress_level)
 
@@ -1254,7 +1275,7 @@ def main():
 		adapters_detected = adapter_identification_pe(complete_adapter_file_name, stk, fq, f, r, threads, final_output, minpres, prefix, phred)
 		cleaned_adapters = parse_adapters(adapter_set, adapters_detected, final_output, prefix)
 
-		if needs_cleanup:
+		if needs_cleanup and os.path.exists(complete_adapter_file_name):
 			print("Removing automatically generated adapters...")
 			os.remove(complete_adapter_file_name)
 
@@ -1274,7 +1295,7 @@ def main():
 		adapters_detected = adapter_identification_se(complete_adapter_file_name, stk, fq, u, threads, final_output, minpres, prefix, phred)
 		cleaned_adapters = parse_adapters(adapter_set, adapters_detected, final_output, prefix)
 
-		if needs_cleanup:
+		if needs_cleanup and os.path.exists(complete_adapter_file_name):
 			print("Removing automatically generated adapters...")
 			os.remove(complete_adapter_file_name)
 
@@ -1561,4 +1582,4 @@ def create_seq_to_fam():
 
 
 
-	os.remove(name)
+	if os.path.exists(name): os.remove(name)
