@@ -652,7 +652,7 @@ def full_trim_pe(forward_in, reverse_in, forward_out, reverse_out, directory, ad
 	Additionally, supports using only one of the two tools. Commands will be built even if the tool is to be skipped, but the call will never be issued.
 	'''
 
-	faqcs_command = [faqcs, "-t", str(threads), "-1", forward_in, "-2", reverse_in, "--artifactFile", adapters, "-q", str(score), "--min_L", str(minlen), "--prefix", "reads", "--trim_only", "-d", directory, "--ascii", phred_fmt]
+	faqcs_command = [faqcs, "-t", str(threads), "-1", forward_in, "-2", reverse_in, "--artifactFile", adapters, "-q", str(score), "--min_L", str(minlen), "--prefix", "reads", "--trim_only", "-d", directory]
 	fastp_command = [fastp, "--thread", str(threads), "--adapter_fasta", adapters, "-l", str(minlen), "--json", directory + "/" + prefix + "post_trim_fastp.json", "--html", directory + "/" + prefix + "post_trim_fastp.html"]
 
 	#Args can be added to fastp command with no consequences if fastp is skipped; command simply won't issue so they will be silent
@@ -665,9 +665,9 @@ def full_trim_pe(forward_in, reverse_in, forward_out, reverse_out, directory, ad
 	else:
 		#FaQCs goes first; this is how I coerce FaQCs reads to look afterwards
 		fastp_command.append("-i")
-		fastp_command.append(directory+"/reads.1.trimmed.fastq")
+		fastp_command.append(directory + "/reads.1.trimmed.fastq")
 		fastp_command.append("-I")
-		fastp_command.append(directory+"/reads.2.trimmed.fastq")
+		fastp_command.append(directory + "/reads.2.trimmed.fastq")
 
 	#Outputs are the same regardless of inputs
 	fastp_command.append("-o")
@@ -682,7 +682,9 @@ def full_trim_pe(forward_in, reverse_in, forward_out, reverse_out, directory, ad
 		fastp_command.append("--cut_right_mean_quality")
 		fastp_command.append(str(window_qual))
 
-	if phred_fmt != "33":
+	if phred_fmt != "33" and skip_faqcs:
+		# Only if skip_faqcs because FaQCs outputs ASCII 33 regardless
+		# of input format
 		fastp_command.append("--phred64")
 
 	if advanced:
@@ -756,7 +758,7 @@ def full_trim_se(reads_in, reads_out, directory, adapters, threads, faqcs, fastp
 	The primary purpose is to issue a FaQCs call on the untrimmed reads, then a subsequent fastp call on the outputs from the FaQCs call.
 	Additionally, supports using only one of the two tools. Commands will be built even if the tool is to be skipped, but the call will never be issued.
 	'''
-	faqcs_command = [faqcs, "-t", str(threads), "-u", reads_in, "--artifactFile", adapters, "-q", str(score), "--min_L", str(minlen), "--prefix", "reads", "--trim_only", "-d", directory, "--ascii", phred_fmt]
+	faqcs_command = [faqcs, "-t", str(threads), "-u", reads_in, "--artifactFile", adapters, "-q", str(score), "--min_L", str(minlen), "--prefix", "reads", "--trim_only", "-d", directory]
 	fastp_command = [fastp, "--thread", str(threads), "--adapter_fasta", adapters, "-l", str(minlen), "--json", directory + "/" + prefix + "post_trim_fastp.json", "--html", directory + "/" + prefix + "post_trim_fastp.html"]
 
 	#Args can be added to fastp command with no consequences if fastp is skipped; command simply won't issue so they will be silent
@@ -767,7 +769,7 @@ def full_trim_se(reads_in, reads_out, directory, adapters, threads, faqcs, fastp
 	else:
 		#FaQCs goes first; this is how I coerce FaQCs reads to look afterwards
 		fastp_command.append("-i")
-		fastp_command.append(directory+"/reads.unpaired.trimmed.fastq")
+		fastp_command.append(directory + "/reads.unpaired.trimmed.fastq")
 
 	#Outputs are the same regardless of inputs
 	fastp_command.append("-o")
@@ -780,7 +782,9 @@ def full_trim_se(reads_in, reads_out, directory, adapters, threads, faqcs, fastp
 		fastp_command.append("--cut_right_mean_quality")
 		fastp_command.append(str(window_qual))
 
-	if phred_fmt != "33":
+	if phred_fmt != "33" and skip_faqcs:
+		# Only if skip_faqcs because FaQCs outputs ASCII 33 regardless
+		# of input format
 		fastp_command.append("--phred64")
 
 	if advanced:
@@ -1286,7 +1290,6 @@ def main():
 		cleaned_adapters = parse_adapters(adapter_set, adapters_detected, final_output, prefix)
 
 		if needs_cleanup and os.path.exists(complete_adapter_file_name):
-			print("Removing automatically generated adapters...")
 			os.remove(complete_adapter_file_name)
 
 		full_trim_pe(f, r, post_trim_f, post_trim_r, final_output, cleaned_adapters, threads, fq, fp, score, minlen, mid, mid_q, prefix, compressor, compression_level, phred, advanced, skip_fp, skip_fq)
@@ -1306,7 +1309,6 @@ def main():
 		cleaned_adapters = parse_adapters(adapter_set, adapters_detected, final_output, prefix)
 
 		if needs_cleanup and os.path.exists(complete_adapter_file_name):
-			print("Removing automatically generated adapters...")
 			os.remove(complete_adapter_file_name)
 
 		full_trim_se(u, post_trim, final_output, cleaned_adapters, threads, fq, fp, score, minlen, mid, mid_q, prefix, compressor, compression_level, phred, advanced, skip_fp, skip_fq)
