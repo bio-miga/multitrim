@@ -505,6 +505,10 @@ def adapter_identification_pe(artificial_artifacts, seqtk_binary, faqcs_binary, 
 	if os.path.exists(output + "/" + pdf_name):
 		os.remove(output + "/" + pdf_name)
 
+	# If no report can be found, assume no adapters
+	if not os.path.exists(output + "/" + prefix + "Subsample_Adapter_Detection.stats.txt"):
+		return []
+
 	#Adapter detection from output of FaQCs
 	detection_report = open(output + "/" + prefix + "Subsample_Adapter_Detection.stats.txt")
 
